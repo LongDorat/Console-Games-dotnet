@@ -1,4 +1,4 @@
-name: Minesweeper Build
+name: Build Minesweeper
 on:
   push:
     paths:
