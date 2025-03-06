@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains a collection of console games developed using .NET. These games are designed to run in a console environment and demonstrate various programming concepts and techniques.
+This repository contains a collection of console games developed using .NET 9.0. These games are designed to run in a console environment and demonstrate various programming concepts and techniques.
 
 ## Game List
 

@@ -1,6 +1,15 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
+        {
+			"name": "Minesweeper",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "Build Minesweeper",
+			"program": "${workspaceFolder}\\Projects\\Minesweeper\\bin\\Debug\\net9.0\\Minesweeper.dll",
+			"cwd": "${workspaceFolder}\\Projects\\Minesweeper\\bin\\Debug\\net9.0",
+			"console": "externalTerminal",
+			"stopAtEntry": false,
+		},
     ]
 }
