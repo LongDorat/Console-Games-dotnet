@@ -1,6 +1,18 @@
 {
     "version": "2.0.0",
     "tasks": [
-        
+        {
+            "label": "Build Minesweeper",
+            "command": "dotnet",
+            "type": "process",
+            "args":
+            [
+                "build",
+                "${workspaceFolder}\\Projects\\Minesweeper\\Minesweeper.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary",
+            ],
+            "problemMatcher": "$msCompile",
+        },
     ]
 }

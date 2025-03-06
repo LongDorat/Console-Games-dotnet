@@ -4,7 +4,7 @@
         "path": "Console-Games-dotnet.sln",
         "project": 
         [
-            
+            "Projects\\Minesweeper\\Minesweeper.csproj",
         ]
     }
 }
