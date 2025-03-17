@@ -47,8 +47,7 @@ class Program
             {
                 Console.WriteLine($"Invalid input. Please enter a value between {min} and {max}.");
                 continue;
-            }
-
+            {
             try
             {
                 T result = (T)Convert.ChangeType(input, typeof(T));
@@ -168,6 +167,7 @@ static class Game
 
         return SetAdjacentMines(board);
     }
+}
 
     private static Cell[,] SetAdjacentMines(Cell[,] board)
     {
@@ -200,9 +200,9 @@ static class Game
                 board[row, column].AdjacentMines = adjacentMines;
             }
         }
-
         return board;
     }
+}
 
     private static Cell[,] RevealAdjacentCells(Cell[,] board, Cursor cursor)
     {
