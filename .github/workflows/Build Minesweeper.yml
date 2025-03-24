@@ -3,11 +3,9 @@ on:
   push:
     paths:
     - 'Projects/Minesweeper/**'
-    - '!**.md'
   pull_request:
     paths:
     - 'Projects/Minesweeper/**'
-    - '!**.md'
   workflow_dispatch:
 jobs:
   build:
