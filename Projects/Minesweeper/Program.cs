@@ -1,4 +1,6 @@
-﻿namespace Minesweeper;
+﻿using System.Text;
+
+namespace Minesweeper;
 
 struct Cell(bool isMine, int adjacentMines, bool isRevealed, bool isFlagged)
 {
@@ -43,15 +45,10 @@ class Program
         {
             Console.Write(message);
             string? input = Console.ReadLine();
-            if (input == null)
-            {
-                Console.WriteLine($"Invalid input. Please enter a value between {min} and {max}.");
-                continue;
-            }
             try
             {
-                T result = (T)Convert.ChangeType(input, typeof(T));
-                if (result.CompareTo(min) >= 0 && result.CompareTo(max) <= 0)
+                T? result = (T?)Convert.ChangeType(input, typeof(T));
+                if (result != null && result.CompareTo(min) >= 0 && result.CompareTo(max) <= 0)
                 {
                     return result;
                 }
@@ -60,7 +57,6 @@ class Program
             {
                 // Ignore this exception and continue to the prompt
             }
-
             Console.WriteLine($"Invalid input. Please enter a value between {min} and {max}.");
         } while (true);
     }
@@ -68,7 +64,6 @@ class Program
     static Cell[,] GenerateBoard(int height, int width)
     {
         var board = new Cell[height, width];
-
         for (int row = 0; row < height; row++)
         {
             for (int column = 0; column < width; column++)
@@ -76,7 +71,6 @@ class Program
                 board[row, column] = new Cell(false, 0, false, false);
             }
         }
-
         return board;
     }
 }
@@ -96,57 +90,67 @@ static class Game
             }
 
             var key = Console.ReadKey(true);
-            switch (key.Key)
-            {
-                case ConsoleKey.UpArrow:
-                    cursor.Row = Math.Max(0, cursor.Row - 1);
-                    break;
-                case ConsoleKey.DownArrow:
-                    cursor.Row = Math.Min(board.GetLength(0) - 1, cursor.Row + 1);
-                    break;
-                case ConsoleKey.LeftArrow:
-                    cursor.Column = Math.Max(0, cursor.Column - 1);
-                    break;
-                case ConsoleKey.RightArrow:
-                    cursor.Column = Math.Min(board.GetLength(1) - 1, cursor.Column + 1);
-                    break;
-                case ConsoleKey.Spacebar:
-                    if (!isMineGenerated)
-                    {
-                        board = PlaceMine(board, cursor, mineCount);
-                        isMineGenerated = true;
-                    }
-
-                    if (board[cursor.Row, cursor.Column].IsMine)
-                    {
-                        EndGame("Game over!", board);
-                    }
-
-                    if (board[cursor.Row, cursor.Column].AdjacentMines == 0)
-                    {
-                        board = RevealAdjacentCells(board, cursor);
-                    }
-                    else
-                    {
-                        board[cursor.Row, cursor.Column].IsRevealed = true;
-                    }
-                    break;
-                case ConsoleKey.F:
-                    board[cursor.Row, cursor.Column].IsFlagged = !board[cursor.Row, cursor.Column].IsFlagged;
-                    break;
-                case ConsoleKey.Escape:
-                    Console.Clear();
-                    Console.WriteLine("MineSweeper has been closed.");
-                    Thread.Sleep(2000);
-                    Environment.Exit(0);
-                    break;
-            }
+            HandleKeyPress(key, ref cursor, board, ref isMineGenerated, mineCount);
 
             Render.Board(board, cursor);
         }
     }
 
-    private static Cell[,] PlaceMine(Cell[,] board, Cursor cursor, int mineCount)
+    private static void HandleKeyPress(ConsoleKeyInfo key, ref Cursor cursor, Cell[,] board, ref bool isMineGenerated, int mineCount)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.UpArrow:
+                cursor.Row = Math.Max(0, cursor.Row - 1);
+                break;
+            case ConsoleKey.DownArrow:
+                cursor.Row = Math.Min(board.GetLength(0) - 1, cursor.Row + 1);
+                break;
+            case ConsoleKey.LeftArrow:
+                cursor.Column = Math.Max(0, cursor.Column - 1);
+                break;
+            case ConsoleKey.RightArrow:
+                cursor.Column = Math.Min(board.GetLength(1) - 1, cursor.Column + 1);
+                break;
+            case ConsoleKey.Spacebar:
+                HandleSpacebarPress(ref cursor, board, ref isMineGenerated, mineCount);
+                break;
+            case ConsoleKey.F:
+                board[cursor.Row, cursor.Column].IsFlagged = !board[cursor.Row, cursor.Column].IsFlagged;
+                break;
+            case ConsoleKey.Escape:
+                Console.Clear();
+                Console.WriteLine("MineSweeper has been closed.");
+                Thread.Sleep(2000);
+                Environment.Exit(0);
+                break;
+        }
+    }
+
+    private static void HandleSpacebarPress(ref Cursor cursor, Cell[,] board, ref bool isMineGenerated, int mineCount)
+    {
+        if (!isMineGenerated)
+        {
+            PlaceMine(board, cursor, mineCount);
+            isMineGenerated = true;
+        }
+
+        if (board[cursor.Row, cursor.Column].IsMine)
+        {
+            EndGame("Game over!", board);
+        }
+
+        if (board[cursor.Row, cursor.Column].AdjacentMines == 0)
+        {
+            RevealAdjacentCells(board, cursor);
+        }
+        else
+        {
+            board[cursor.Row, cursor.Column].IsRevealed = true;
+        }
+    }
+
+    private static void PlaceMine(Cell[,] board, Cursor cursor, int mineCount)
     {
         var random = new Random();
         int minesPlaced = 0;
@@ -156,19 +160,17 @@ static class Game
             int row = random.Next(board.GetLength(0));
             int column = random.Next(board.GetLength(1));
 
-            if (board[row, column].IsMine || (row == cursor.Row && column == cursor.Column))
+            if (!board[row, column].IsMine || (row != cursor.Row && column != cursor.Column))
             {
-                continue;
+                board[row, column].IsMine = true;
+                minesPlaced++;
             }
-
-            board[row, column].IsMine = true;
-            minesPlaced++;
         }
 
-        return SetAdjacentMines(board);
+        SetAdjacentMines(board);
     }
 
-    private static Cell[,] SetAdjacentMines(Cell[,] board)
+    private static void SetAdjacentMines(Cell[,] board)
     {
         for (int row = 0; row < board.GetLength(0); row++)
         {
@@ -184,12 +186,7 @@ static class Game
                 {
                     for (int j = -1; j <= 1; j++)
                     {
-                        if (row + i < 0 || row + i >= board.GetLength(0) || column + j < 0 || column + j >= board.GetLength(1))
-                        {
-                            continue;
-                        }
-
-                        if (board[row + i, column + j].IsMine)
+                        if (IsValidCell(board, new Cursor(row + i, column + j)) && board[row + i, column + j].IsMine)
                         {
                             adjacentMines++;
                         }
@@ -199,10 +196,9 @@ static class Game
                 board[row, column].AdjacentMines = adjacentMines;
             }
         }
-        return board;
     }
 
-    private static Cell[,] RevealAdjacentCells(Cell[,] board, Cursor cursor)
+    private static void RevealAdjacentCells(Cell[,] board, Cursor cursor)
     {
         var queue = new Queue<Cursor>();
         queue.Enqueue(cursor);
@@ -212,27 +208,27 @@ static class Game
             Cursor current = queue.Dequeue();
             board[current.Row, current.Column].IsRevealed = true;
 
-            if (board[current.Row, current.Column].AdjacentMines == 0)
+            if (board[current.Row, current.Column].AdjacentMines != 0)
             {
-                for (int i = -1; i <= 1; i++)
-                {
-                    for (int j = -1; j <= 1; j++)
-                    {
-                        if (current.Row + i < 0 || current.Row + i >= board.GetLength(0) || current.Column + j < 0 || current.Column + j >= board.GetLength(1))
-                        {
-                            continue;
-                        }
+                continue;
+            }
 
-                        if (!board[current.Row + i, current.Column + j].IsRevealed)
-                        {
-                            queue.Enqueue(new Cursor(current.Row + i, current.Column + j));
-                        }
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (IsValidCell(board, new Cursor(current.Row + i, current.Column + j)) && !board[current.Row + i, current.Column + j].IsRevealed)
+                    {
+                        queue.Enqueue(new Cursor(current.Row + i, current.Column + j));
                     }
                 }
             }
         }
+    }
 
-        return board;
+    private static bool IsValidCell(Cell[,] board, Cursor cursor)
+    {
+        return cursor.Row >= 0 && cursor.Row < board.GetLength(0) && cursor.Column >= 0 && cursor.Column < board.GetLength(1);
     }
 
     private static bool IsWin(Cell[,] board, int mineCount)
@@ -260,6 +256,14 @@ static class Game
 
     private static void EndGame(string message, Cell[,] board)
     {
+        for (int row = 0; row < board.GetLength(0); row++)
+        {
+            for (int column = 0; column < board.GetLength(1); column++)
+            {
+                board[row, column].IsRevealed = true;
+            }
+        }
+
         Render.Board(board, new Cursor(0, 0));
         Console.SetCursorPosition(0, board.GetLength(0) + 1);
         Console.WriteLine(message);
@@ -273,34 +277,36 @@ static class Render
 {
     public static void Board(Cell[,] board, Cursor cursor)
     {
-        Console.Clear();
-
+        var buffer = new StringBuilder();
         for (int row = 0; row < board.GetLength(0); row++)
         {
             for (int column = 0; column < board.GetLength(1); column++)
             {
                 if (board[row, column].IsFlagged)
                 {
-                    Console.Write("F ");
+                    buffer.Append("F ");
                 }
                 else if (board[row, column].IsRevealed)
                 {
                     if (board[row, column].IsMine)
                     {
-                        Console.Write("X ");
+                        buffer.Append("X ");
                     }
                     else
                     {
-                        Console.Write($"{board[row, column].AdjacentMines} ");
+                        buffer.Append($"{board[row, column].AdjacentMines} ");
                     }
                 }
                 else
                 {
-                    Console.Write("# ");
+                    buffer.Append("# ");
                 }
             }
-            Console.WriteLine();
+            buffer.AppendLine();
         }
+
+        Console.Clear();
+        Console.WriteLine(buffer.ToString());
         Console.SetCursorPosition(cursor.Column * 2, cursor.Row);
     }
 }
