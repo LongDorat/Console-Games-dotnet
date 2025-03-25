@@ -8,6 +8,8 @@ struct Cell(bool isMine, int adjacentMines, bool isRevealed, bool isFlagged)
     public int AdjacentMines = adjacentMines;
     public bool IsRevealed = isRevealed;
     public bool IsFlagged = isFlagged;
+
+    public void ToggleFlag() => IsFlagged = !IsFlagged;
 }
 
 struct Cursor(int row, int column)
@@ -116,7 +118,7 @@ static class Game
                 HandleSpacebarPress(ref cursor, board, ref isMineGenerated, mineCount);
                 break;
             case ConsoleKey.F:
-                board[cursor.Row, cursor.Column].IsFlagged = !board[cursor.Row, cursor.Column].IsFlagged;
+                board[cursor.Row, cursor.Column].ToggleFlag();
                 break;
             case ConsoleKey.Escape:
                 Console.Clear();
