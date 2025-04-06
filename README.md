@@ -53,7 +53,7 @@ We welcome contributions from the community! Here are some ways you can get invo
 
 1. **Report Bugs**: If you find any bugs, please report them by creating an issue on the [GitHub Issues](https://github.com/LongDorat/Console-Games-dotnet/issues/new) page.
 2. **Suggest Features**: Have an idea for a new game or feature? Open a [discussion](https://github.com/LongDorat/Console-Games-dotnet/discussions/new/choose).
-3. **Submit Pull Requests**: If you want to contribute code, fork the repository, make your changes, and submit a pull request. Please ensure your [TODO_LIST](TODO_LIST.md) is fulfilled.
+3. **Submit Pull Requests**: If you want to contribute code, fork the repository, make your changes, and submit a pull request.
 
 ## License
 
